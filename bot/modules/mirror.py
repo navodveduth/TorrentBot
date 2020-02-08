@@ -16,10 +16,9 @@ import os
 
 
 class MirrorListener(listeners.MirrorListeners):
-    def __init__(self, bot, update, isTar=False, tag=None):
+    def __init__(self, bot, update, isTar=False):
         super().__init__(bot, update)
         self.isTar = isTar
-        self.tag = tag
 
     def onDownloadStarted(self):
         pass
@@ -99,8 +98,6 @@ class MirrorListener(listeners.MirrorListeners):
                 if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                     share_url += '/'
                 msg += f'\n\n Shareable link: <a href="{share_url}">here</a>'
-            if self.tag is not None:
-                msg += f'\ncc: @{self.tag}'
             try:
                 fs_utils.clean_download(download_dict[self.uid].path())
             except FileNotFoundError:
@@ -136,18 +133,19 @@ def _mirror(bot, update, isTar=False):
         link = ''
     LOGGER.info(link)
     link = link.strip()
-    reply_to = update.message.reply_to_message
-    if reply_to is not None:
-        tag = reply_to.from_user.username
-        if len(link) == 0:
-            if reply_to.document is not None and reply_to.document.mime_type == "application/x-bittorrent":
-                link = reply_to.document.get_file().file_path
-    else:
-        tag = None
+
+    if len(link) == 0:
+        if update.message.reply_to_message is not None:
+            document = update.message.reply_to_message.document
+            if document is not None and document.mime_type == "application/x-bittorrent":
+                link = document.get_file().file_path
+            else:
+                sendMessage('Only torrent files can be mirrored from telegram', bot, update)
+                return
     if not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
         sendMessage('No download source provided', bot, update)
         return
-    listener = MirrorListener(bot, update, isTar, tag)
+    listener = MirrorListener(bot, update, isTar)
     aria = aria2_download.AriaDownloadHelper(listener)
     aria.add_download(link, f'{DOWNLOAD_DIR}/{listener.uid}/')
     sendStatusMessage(update, bot)

@@ -1,12 +1,10 @@
-from aria2p import API
-from aria2p.client import ClientException
-
-from bot import aria2
+from bot import aria2,download_dict,download_dict_lock
 from bot.helper.ext_utils.bot_utils import *
+from .download_helper import DownloadHelper
 from bot.helper.mirror_utils.status_utils.aria_download_status import AriaDownloadStatus
 from bot.helper.telegram_helper.message_utils import *
-from .download_helper import DownloadHelper
-
+import threading
+from aria2p import API
 
 class AriaDownloadHelper(DownloadHelper):
 
@@ -39,16 +37,12 @@ class AriaDownloadHelper(DownloadHelper):
     def __onDownloadPause(self, api, gid):
         if self.gid == gid:
             LOGGER.info("Called onDownloadPause")
-            download = api.get_download(gid)
-            error = download.error_message
-            self._listener.onDownloadError(error)
+            self._listener.onDownloadError('Download stopped by user!')
 
     def __onDownloadStopped(self, api, gid):
         if self.gid == gid:
             LOGGER.info("Called on_download_stop")
-            download = api.get_download(gid)
-            error = download.error_message
-            self._listener.onDownloadError(error)
+            self._listener.onDownloadError('Download stopped by user!')
 
     def __onDownloadError(self, api, gid):
         with self._resource_lock:
@@ -59,14 +53,10 @@ class AriaDownloadHelper(DownloadHelper):
                 self._listener.onDownloadError(error)
 
     def add_download(self, link: str, path):
-        try:
-            if is_magnet(link):
-                download = aria2.add_magnet(link, {'dir': path})
-            else:
-                download = aria2.add_uris([link], {'dir': path})
-        except ClientException as err:
-            self._listener.onDownloadError(err.message)
-            return
+        if is_magnet(link):
+            download = aria2.add_magnet(link, {'dir': path})
+        else:
+            download = aria2.add_uris([link], {'dir': path})
         self.gid = download.gid
         with download_dict_lock:
             download_dict[self._listener.uid] = AriaDownloadStatus(self.gid, self._listener)

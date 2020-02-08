@@ -92,7 +92,7 @@ def get_readable_message():
                     f"{download.size()}" \
                     f" at {download.speed()}, ETA: {download.eta()} "
             if download.status() == MirrorStatus.STATUS_DOWNLOADING:
-                if hasattr(download,'is_torrent'):
+                if hasattr(download, 'is_torrent'):
                     msg += f"| P: {download.download().connections} " \
                            f"| S: {download.download().num_seeders}"
             msg += "\n\n"
