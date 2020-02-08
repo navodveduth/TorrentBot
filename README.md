@@ -34,7 +34,7 @@ This will take a long time esspecially if you are running Linux on WSL or you ha
 
 Clone this repo:
 ```
-git clone https://gitlab.com/eliasbenb/torrentbot/
+git clone https://github.com/eliasbenb/torrentbot/
 cd TorrentBot
 ```
 For WSL users:
