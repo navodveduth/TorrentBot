@@ -9,7 +9,7 @@ This is a repo to create a Telegram bot that uses aria2 to mirror files from the
 - Index Link support
 
 ## Disclaimer
-### - Credit for all code goes to https://github.com/lzzy12/
+- ### Credit for all code goes to https://github.com/lzzy12/
 - This process will take approximately 30 minutes to setup
 - You will need a Linux terminal to set this up. Windows user can also complete this using something called WSL. You can read about it online
 - You will need to deploy this bot either on your own server using Docker or on Heroku using a free Heroku account
